@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EMDR-lignende visuell simulator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="lightCanvas"></canvas>
+
+  <main class="app">
+    <h1>Automatisk EMDR-lignende visuell simulator</h1>
+
+    <p class="warning">
+      Merk: Dette er kun en visuell simulering og refleksjonsøvelse.
+      Det erstatter ikke behandling hos psykolog, lege eller EMDR-terapeut.
+      Stopp hvis det føles ubehagelig eller overveldende.
+    </p>
+
+    <h2 id="stepTitle">Klar</h2>
+
+    <p id="instructionText" class="instruction"></p>
+
+    <section class="ratings">
+      <label>
+        Før økt - ubehag 0–10:
+        <input id="beforeDiscomfort" type="range" min="0" max="10" value="6" />
+        <span id="beforeDiscomfortValue">6</span>
+      </label>
+
+      <label>
+        Før økt - trygghet 0–10:
+        <input id="beforeSafety" type="range" min="0" max="10" value="4" />
+        <span id="beforeSafetyValue">4</span>
+      </label>
+
+      <label>
+        Etter økt - ubehag 0–10:
+        <input id="afterDiscomfort" type="range" min="0" max="10" value="3" />
+        <span id="afterDiscomfortValue">3</span>
+      </label>
+
+      <label>
+        Etter økt - trygghet 0–10:
+        <input id="afterSafety" type="range" min="0" max="10" value="6" />
+        <span id="afterSafetyValue">6</span>
+      </label>
+    </section>
+
+    <section class="controls">
+      <label>
+        Hastighet på lys:
+        <input id="speedSlider" type="range" min="25" max="100" value="25" />
+        <span id="speedValue">25</span>
+      </label>
+
+      <label>
+        Talehastighet:
+        <input id="speechRateSlider" type="range" min="0.5" max="1.2" step="0.05" value="0.8" />
+        <span id="speechRateValue">0.8</span>
+      </label>
+    </section>
+
+    <section class="buttons">
+      <button id="startBtn" class="green">Start automatisk økt</button>
+      <button id="introBtn">Les introduksjon</button>
+      <button id="stopBtn" class="red">Stopp økt</button>
+      <button id="repeatBtn">Les igjen</button>
+      <button id="stopVoiceBtn">Stopp tale</button>
+      <button id="analysisBtn">Vis / oppdater analyse</button>
+      <button id="resetBtn">Nullstill</button>
+    </section>
+
+    <p id="statusText" class="status"></p>
+    <p id="progressText" class="progress"></p>
+    <p id="timerText" class="timer"></p>
+  </main>
+
+  <dialog id="introDialog">
+    <h2>Introduksjon</h2>
+    <div class="dialog-content" id="introContent"></div>
+    <div class="dialog-buttons">
+      <button id="readIntroBtn" class="green">Les introduksjonen høyt</button>
+      <button id="closeIntroBtn">Lukk</button>
+    </div>
+  </dialog>
+
+  <dialog id="analysisDialog">
+    <h2>Kort refleksjonsanalyse</h2>
+    <div class="dialog-content" id="analysisContent"></div>
+    <div class="dialog-buttons">
+      <button id="closeAnalysisBtn">Lukk</button>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
