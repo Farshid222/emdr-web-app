@@ -33,7 +33,7 @@ Noen ganger kan symptomene bli så sterke at de tar mye plass i hverdagen, og pe
 
 Denne appen er laget som en prototype og et forebyggende selvhjelpsverktøy. Den kan støtte deg i å arbeide med vanskelige minner gjennom trygghet, selvstyrke og veiledning. Dette kan ses som en empowerment-metode, eller hjelp til selvhjelp. Appen er ikke en erstatning for behandling hos psykolog, lege eller EMDR-terapeut, men kan være et støttende verktøy på veien mot mer styrke, balanse og ro i hverdagen.
 
-Du er ikke alene. Gå rolig fram, stopp hvis det blir for ubehagelig, og søk profesjonell hjelp dersom reaksjonene blir sterke eller vanskelige å håndtere.`;
+Du er ikke alene.`;
 
 const steps = [
   {
@@ -42,7 +42,8 @@ const steps = [
     duration: 120,
     status: "Verste bilde og vanskelig tanke → rødt lystog",
     instruction:
-      "Ta fram det verste bildet i forhold til den vanskelige tanken du har. Når du ser dette verste bildet for deg, gir det tanker om mindreverd, utrygghet eller maktesløshet? Hva slags følelser får du av denne tanken? Er det angst, redsel eller skyldfølelse? Gi følelsen du får av dette verste bildet og de vanskelige tankene en skår fra null til ti. Hvor sitter denne følelsen i kroppen? Er den i hodet, halsen, brystet eller magen? Kjenn godt på denne følelsen, og legg merke til den. Legg godt merke til hva du kjenner i kroppen. Når stemmen er ferdig, starter det røde lyset. Da kan du følge lyset med øynene, uten å bevege hodet, i cirka to minutter."
+  "Gå rolig fram. Stopp hvis det blir for ubehagelig, og søk profesjonell hjelp dersom reaksjonene blir sterke eller vanskelige å håndtere. " +
+  "Ta fram det verste bildet i forhold til den vanskelige tanken du har. Når du ser dette verste bildet for deg, gir det tanker om mindreverd, utrygghet eller maktesløshet? Hva slags følelser får du av denne tanken? Er det angst, redsel eller skyldfølelse? Gi følelsen du får av dette verste bildet og de vanskelige tankene en skår fra null til ti. Hvor sitter denne følelsen i kroppen? Er den i hodet, halsen, brystet eller magen? Kjenn godt på denne følelsen, og legg merke til den. Legg godt merke til hva du kjenner i kroppen. Når stemmen er ferdig, starter det røde lyset. Da kan du følge lyset med øynene, uten å bevege hodet, i cirka to minutter."
   },
   {
     title: "Steg 2: Første observasjon",
