@@ -40,7 +40,7 @@ const steps = [
     title: "Steg 1: Verste bilde og vanskelig tanke",
     color: "red",
     duration: 120,
-    status: "Verste bilde og vanskelig tanke → rødt LED-tog",
+    status: "Verste bilde og vanskelig tanke → rødt LED-lys",
     instruction:
       "Gå rolig fram. Stopp hvis det blir for ubehagelig, og søk profesjonell hjelp dersom reaksjonene blir sterke eller vanskelige å håndtere. " +
       "Ta fram det verste bildet i forhold til den vanskelige tanken du har. Når du ser dette verste bildet for deg, gir det tanker om mindreverd, utrygghet eller maktesløshet? Hva slags følelser får du av denne tanken? Er det angst, redsel eller skyldfølelse? Gi følelsen du får av dette verste bildet og de vanskelige tankene en skår fra null til ti. Hvor sitter denne følelsen i kroppen? Er den i hodet, halsen, brystet eller magen? Kjenn godt på denne følelsen, og legg merke til den. Legg godt merke til hva du kjenner i kroppen. Når stemmen er ferdig, starter det røde lyset. Da kan du følge lyset med øynene, uten å bevege hodet, i cirka to minutter."
@@ -49,7 +49,7 @@ const steps = [
     title: "Steg 2: Første observasjon",
     color: "blue",
     duration: 120,
-    status: "Observasjon av endring → blått LED-tog",
+    status: "Observasjon av endring → blått LED-lys",
     instruction:
       "Stopp litt opp. Hva legger du merke til nå? Er følelsen sterkere? Er den svakere? Eller er den annerledes? Bare observer det som kommer. Når stemmen er ferdig, starter det blå lyset. Da kan du følge lyset med øynene i cirka to minutter. Stopp deretter litt opp igjen. Hva legger du merke til nå? Er følelsen sterkere, svakere eller annerledes? Bare observer det som kommer. Hvor sterk er følelsen nå, fra null til ti?"
   },
@@ -57,7 +57,7 @@ const steps = [
     title: "Steg 3: Tilbake til verste bilde",
     color: "blue",
     duration: 120,
-    status: "Verste bilde igjen → blått LED-tog",
+    status: "Verste bilde igjen → blått LED-lys",
     instruction:
       "Ta fram det verste bildet igjen. Ta også fram de vanskelige tankene og følelsen du får. Legg godt merke til hva du kjenner i kroppen. Når stemmen er ferdig, starter det blå lyset igjen. Følg lyset med øynene i cirka to minutter."
   },
@@ -65,7 +65,7 @@ const steps = [
     title: "Steg 4: Mestring og tryggere tanke",
     color: "green",
     duration: 60,
-    status: "Mestring og trygg tanke → grønt LED-tog",
+    status: "Mestring og trygg tanke → grønt LED-lys",
     instruction:
       "Nå kan du flytte oppmerksomheten til en mestringsfølelse og en tryggere tanke som du har hatt tidligere i livet. Tenk for eksempel: Jeg er trygg nå. Jeg klarer dette. Det som skjedde, er over nå. Pust rolig. Gi den positive følelsen en skår fra null til ti. Når stemmen er ferdig, starter det grønne lyset. Da kan du følge lyset med øynene i cirka ett minutt."
   },
@@ -73,7 +73,7 @@ const steps = [
     title: "Steg 5: Mestring og trygghet igjen",
     color: "green",
     duration: 60,
-    status: "Mestring og trygghet igjen → grønt LED-tog",
+    status: "Mestring og trygghet igjen → grønt LED-lys",
     instruction:
       "Fortsett med den samme mestringsfølelsen og den tryggere tanken. Legg merke til kroppen mens du holder fast ved følelsen av trygghet. Pust rolig. Når stemmen er ferdig, starter det grønne lyset en gang til. Følg lyset med øynene i cirka ett minutt, på samme måte."
   },
@@ -81,7 +81,7 @@ const steps = [
     title: "Steg 6: Sjekk verste bilde igjen",
     color: "red",
     duration: 120,
-    status: "Sjekk verste bilde igjen → rødt LED-tog",
+    status: "Sjekk verste bilde igjen → rødt LED-lys",
     instruction:
       "Nå kan du ta fram igjen det verste bildet og de vanskelige tankene. Hva legger du merke til nå? Er følelsen sterkere? Er den svakere? Eller er den annerledes? Bare observer det som kommer. Hvor sterk er følelsen nå, fra null til ti? Selv om tallet er null, starter det røde lyset igjen når stemmen er ferdig. Da kan du følge lyset med øynene i cirka to minutter."
   }
@@ -98,14 +98,13 @@ let countdownTimer = null;
 let animationTimer = null;
 
 let direction = 1;
-let speed = 25;
+let speed = 50;
 
 let y = 75;
 
-// LED-bar som ligner mer på fysisk EMDR light bar
+// LED-bar
 let ledCount = 95;
-let activeLedIndex = 3;
-let blinkOn = true;
+let activeLedIndex = 0;
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
@@ -139,8 +138,6 @@ function palette(color) {
   if (color === "red") {
     return {
       main: "#ff2a2a",
-      mid: "#d41414",
-      dim: "#751111",
       glow: "#ff5a5a"
     };
   }
@@ -148,8 +145,6 @@ function palette(color) {
   if (color === "blue") {
     return {
       main: "#2ecbff",
-      mid: "#168ec4",
-      dim: "#0b3e5e",
       glow: "#76e2ff"
     };
   }
@@ -157,16 +152,12 @@ function palette(color) {
   if (color === "green") {
     return {
       main: "#39ff7a",
-      mid: "#12b94d",
-      dim: "#0e5c2c",
       glow: "#87ffad"
     };
   }
 
   return {
     main: "#ffffff",
-    mid: "#bbbbbb",
-    dim: "#555555",
     glow: "#ffffff"
   };
 }
@@ -218,66 +209,34 @@ function drawLightBar() {
     );
   }
 
-  // Aktivt LED-tog: 5 små lamper, som på en fysisk light bar
-  const activeOffsets = [-2, -1, 0, 1, 2];
+  // Ett aktivt LED-lys
+  const ledX = getLedX(activeLedIndex);
 
-  for (const offset of activeOffsets) {
-    const index = activeLedIndex + offset;
+  ctx.save();
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  ctx.arc(ledX, y, 10, 0, Math.PI * 2);
+  ctx.fillStyle = p.glow;
+  ctx.fill();
+  ctx.restore();
 
-    if (index < 0 || index >= ledCount) continue;
+  drawCircle(
+    ledX,
+    y,
+    5.8,
+    p.main,
+    "#f2f2f2",
+    1
+  );
 
-    const ledX = getLedX(index);
-
-    let fill = p.dim;
-    let radius = 4.3;
-    let glowRadius = 7;
-    let alpha = 0.35;
-
-    if (offset === -1 || offset === 1) {
-      fill = p.mid;
-      radius = 4.8;
-      glowRadius = 8;
-      alpha = 0.55;
-    }
-
-    if (offset === 0) {
-      fill = p.main;
-      radius = 5.6;
-      glowRadius = 10;
-      alpha = 0.9;
-    }
-
-    if (blinkOn) {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.beginPath();
-      ctx.arc(ledX, y, glowRadius, 0, Math.PI * 2);
-      ctx.fillStyle = p.glow;
-      ctx.fill();
-      ctx.restore();
-
-      drawCircle(
-        ledX,
-        y,
-        radius,
-        fill,
-        "#f2f2f2",
-        1
-      );
-
-      // Liten lysende kjerne i midten
-      if (offset === 0) {
-        drawCircle(
-          ledX,
-          y,
-          1.9,
-          "#ffffff",
-          p.main,
-          1
-        );
-      }
-    }
-  }
+  drawCircle(
+    ledX,
+    y,
+    2,
+    "#ffffff",
+    p.main,
+    1
+  );
 }
 
 function animateLight() {
@@ -285,8 +244,8 @@ function animateLight() {
 
   activeLedIndex += direction;
 
-  const minIndex = 2;
-  const maxIndex = ledCount - 3;
+  const minIndex = 0;
+  const maxIndex = ledCount - 1;
 
   if (activeLedIndex >= maxIndex) {
     activeLedIndex = maxIndex;
@@ -298,12 +257,11 @@ function animateLight() {
     direction = 1;
   }
 
-  blinkOn = true;
   drawLightBar();
 
-  // Høyere sliderverdi = raskere LED-hopp
-  // 25 ≈ roligere, 100 ≈ veldig rask
-  const delay = Math.max(18, 155 - speed);
+  // Høyere verdi = raskere LED-hopp.
+  // 50 = raskt, 300 = svært raskt.
+  const delay = Math.max(6, 130 - speed * 0.4);
 
   animationTimer = setTimeout(animateLight, delay);
 }
@@ -344,9 +302,8 @@ function applyStep() {
   progressText.textContent = `Steg ${currentStep + 1} av ${steps.length}`;
   remainingSeconds = step.duration;
 
-  activeLedIndex = 3;
+  activeLedIndex = 0;
   direction = 1;
-  blinkOn = true;
 
   timerText.textContent = `Klar. Lysvarighet i dette steget: ${step.duration} sekunder`;
   drawLightBar();
@@ -410,7 +367,6 @@ function finishCurrentLightPeriod() {
   runningLight = false;
   clearTimers();
 
-  blinkOn = true;
   drawLightBar();
 
   if (currentStep < steps.length - 1) {
@@ -428,7 +384,6 @@ function finishSession() {
 
   clearTimers();
 
-  blinkOn = true;
   drawLightBar();
 
   stepTitle.textContent = "Økten er ferdig";
@@ -467,8 +422,8 @@ function resetApp() {
   afterDiscomfort.value = 3;
   afterSafety.value = 6;
 
-  speedSlider.value = 25;
-  speechRateSlider.value = 0.8;
+  speedSlider.value = 50;
+  speechRateSlider.value = 0.75;
 
   updateValues();
   applyStep();
