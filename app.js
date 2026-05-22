@@ -40,16 +40,16 @@ const steps = [
     title: "Steg 1: Verste bilde og vanskelig tanke",
     color: "red",
     duration: 120,
-    status: "Verste bilde og vanskelig tanke → rødt lystog",
+    status: "Verste bilde og vanskelig tanke → rødt LED-tog",
     instruction:
-  "Gå rolig fram. Stopp hvis det blir for ubehagelig, og søk profesjonell hjelp dersom reaksjonene blir sterke eller vanskelige å håndtere. " +
-  "Ta fram det verste bildet i forhold til den vanskelige tanken du har. Når du ser dette verste bildet for deg, gir det tanker om mindreverd, utrygghet eller maktesløshet? Hva slags følelser får du av denne tanken? Er det angst, redsel eller skyldfølelse? Gi følelsen du får av dette verste bildet og de vanskelige tankene en skår fra null til ti. Hvor sitter denne følelsen i kroppen? Er den i hodet, halsen, brystet eller magen? Kjenn godt på denne følelsen, og legg merke til den. Legg godt merke til hva du kjenner i kroppen. Når stemmen er ferdig, starter det røde lyset. Da kan du følge lyset med øynene, uten å bevege hodet, i cirka to minutter."
+      "Gå rolig fram. Stopp hvis det blir for ubehagelig, og søk profesjonell hjelp dersom reaksjonene blir sterke eller vanskelige å håndtere. " +
+      "Ta fram det verste bildet i forhold til den vanskelige tanken du har. Når du ser dette verste bildet for deg, gir det tanker om mindreverd, utrygghet eller maktesløshet? Hva slags følelser får du av denne tanken? Er det angst, redsel eller skyldfølelse? Gi følelsen du får av dette verste bildet og de vanskelige tankene en skår fra null til ti. Hvor sitter denne følelsen i kroppen? Er den i hodet, halsen, brystet eller magen? Kjenn godt på denne følelsen, og legg merke til den. Legg godt merke til hva du kjenner i kroppen. Når stemmen er ferdig, starter det røde lyset. Da kan du følge lyset med øynene, uten å bevege hodet, i cirka to minutter."
   },
   {
     title: "Steg 2: Første observasjon",
     color: "blue",
     duration: 120,
-    status: "Observasjon av endring → blått lystog",
+    status: "Observasjon av endring → blått LED-tog",
     instruction:
       "Stopp litt opp. Hva legger du merke til nå? Er følelsen sterkere? Er den svakere? Eller er den annerledes? Bare observer det som kommer. Når stemmen er ferdig, starter det blå lyset. Da kan du følge lyset med øynene i cirka to minutter. Stopp deretter litt opp igjen. Hva legger du merke til nå? Er følelsen sterkere, svakere eller annerledes? Bare observer det som kommer. Hvor sterk er følelsen nå, fra null til ti?"
   },
@@ -57,7 +57,7 @@ const steps = [
     title: "Steg 3: Tilbake til verste bilde",
     color: "blue",
     duration: 120,
-    status: "Verste bilde igjen → blått lystog",
+    status: "Verste bilde igjen → blått LED-tog",
     instruction:
       "Ta fram det verste bildet igjen. Ta også fram de vanskelige tankene og følelsen du får. Legg godt merke til hva du kjenner i kroppen. Når stemmen er ferdig, starter det blå lyset igjen. Følg lyset med øynene i cirka to minutter."
   },
@@ -65,7 +65,7 @@ const steps = [
     title: "Steg 4: Mestring og tryggere tanke",
     color: "green",
     duration: 60,
-    status: "Mestring og trygg tanke → grønt lystog",
+    status: "Mestring og trygg tanke → grønt LED-tog",
     instruction:
       "Nå kan du flytte oppmerksomheten til en mestringsfølelse og en tryggere tanke som du har hatt tidligere i livet. Tenk for eksempel: Jeg er trygg nå. Jeg klarer dette. Det som skjedde, er over nå. Pust rolig. Gi den positive følelsen en skår fra null til ti. Når stemmen er ferdig, starter det grønne lyset. Da kan du følge lyset med øynene i cirka ett minutt."
   },
@@ -73,7 +73,7 @@ const steps = [
     title: "Steg 5: Mestring og trygghet igjen",
     color: "green",
     duration: 60,
-    status: "Mestring og trygghet igjen → grønt lystog",
+    status: "Mestring og trygghet igjen → grønt LED-tog",
     instruction:
       "Fortsett med den samme mestringsfølelsen og den tryggere tanken. Legg merke til kroppen mens du holder fast ved følelsen av trygghet. Pust rolig. Når stemmen er ferdig, starter det grønne lyset en gang til. Følg lyset med øynene i cirka ett minutt, på samme måte."
   },
@@ -81,7 +81,7 @@ const steps = [
     title: "Steg 6: Sjekk verste bilde igjen",
     color: "red",
     duration: 120,
-    status: "Sjekk verste bilde igjen → rødt lystog",
+    status: "Sjekk verste bilde igjen → rødt LED-tog",
     instruction:
       "Nå kan du ta fram igjen det verste bildet og de vanskelige tankene. Hva legger du merke til nå? Er følelsen sterkere? Er den svakere? Eller er den annerledes? Bare observer det som kommer. Hvor sterk er følelsen nå, fra null til ti? Selv om tallet er null, starter det røde lyset igjen når stemmen er ferdig. Da kan du følge lyset med øynene i cirka to minutter."
   }
@@ -95,13 +95,16 @@ let runningLight = false;
 let currentStep = 0;
 let remainingSeconds = 0;
 let countdownTimer = null;
-let animationFrame = null;
+let animationTimer = null;
+
 let direction = 1;
 let speed = 25;
-let x = 120;
+
 let y = 75;
-let trainGap = 44;
-let ledCount = 35;
+
+// LED-bar som ligner mer på fysisk EMDR light bar
+let ledCount = 95;
+let activeLedIndex = 3;
 let blinkOn = true;
 
 function resizeCanvas() {
@@ -116,16 +119,56 @@ function resizeCanvas() {
 
 function getLimits() {
   return {
-    left: 25,
-    right: Math.max(window.innerWidth - 25, 225)
+    left: 22,
+    right: Math.max(window.innerWidth - 22, 260)
   };
 }
 
+function getLedSpacing() {
+  const limits = getLimits();
+  return (limits.right - limits.left) / (ledCount - 1);
+}
+
+function getLedX(index) {
+  const limits = getLimits();
+  const spacing = getLedSpacing();
+  return limits.left + index * spacing;
+}
+
 function palette(color) {
-  if (color === "red") return { main: "#ff1744", mid: "#c62828", dim: "#7f0000", glow: "#ff5252" };
-  if (color === "blue") return { main: "#40c4ff", mid: "#0288d1", dim: "#01579b", glow: "#80d8ff" };
-  if (color === "green") return { main: "#69f0ae", mid: "#00c853", dim: "#1b5e20", glow: "#b9f6ca" };
-  return { main: "#ffffff", mid: "#bbbbbb", dim: "#555555", glow: "#ffffff" };
+  if (color === "red") {
+    return {
+      main: "#ff2a2a",
+      mid: "#d41414",
+      dim: "#751111",
+      glow: "#ff5a5a"
+    };
+  }
+
+  if (color === "blue") {
+    return {
+      main: "#2ecbff",
+      mid: "#168ec4",
+      dim: "#0b3e5e",
+      glow: "#76e2ff"
+    };
+  }
+
+  if (color === "green") {
+    return {
+      main: "#39ff7a",
+      mid: "#12b94d",
+      dim: "#0e5c2c",
+      glow: "#87ffad"
+    };
+  }
+
+  return {
+    main: "#ffffff",
+    mid: "#bbbbbb",
+    dim: "#555555",
+    glow: "#ffffff"
+  };
 }
 
 function drawCircle(cx, cy, radius, fill, stroke, lineWidth = 1) {
@@ -146,65 +189,123 @@ function drawLightBar() {
 
   ctx.clearRect(0, 0, width, 150);
 
-  ctx.fillStyle = "#050505";
-  ctx.strokeStyle = "#333333";
+  // Bakplate
+  ctx.fillStyle = "#030303";
+  ctx.strokeStyle = "#2e2e2e";
   ctx.lineWidth = 2;
-  ctx.fillRect(0, y - 38, width, 76);
-  ctx.strokeRect(0, y - 38, width, 76);
+  ctx.fillRect(0, y - 34, width, 68);
+  ctx.strokeRect(0, y - 34, width, 68);
 
-  ctx.strokeStyle = "#222222";
-  ctx.lineWidth = 3;
+  // Tynn linje gjennom LED-raden
+  ctx.strokeStyle = "#151515";
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(limits.left, y);
   ctx.lineTo(limits.right, y);
   ctx.stroke();
 
-  const spacing = (limits.right - limits.left) / (ledCount - 1);
+  // Inaktive LED-punkter
   for (let i = 0; i < ledCount; i++) {
-    const ledX = limits.left + i * spacing;
-    drawCircle(ledX, y, 5, "#202020", "#3a3a3a", 1);
+    const ledX = getLedX(i);
+
+    drawCircle(
+      ledX,
+      y,
+      3.3,
+      "#101010",
+      "#303030",
+      1
+    );
   }
 
-  if (!blinkOn) return;
+  // Aktivt LED-tog: 5 små lamper, som på en fysisk light bar
+  const activeOffsets = [-2, -1, 0, 1, 2];
 
-  const active = [
-    { px: x - trainGap, color: p.dim, r: 13 },
-    { px: x, color: p.main, r: 18 },
-    { px: x + trainGap, color: p.mid, r: 13 }
-  ];
+  for (const offset of activeOffsets) {
+    const index = activeLedIndex + offset;
 
-  for (const lamp of active) {
-    ctx.beginPath();
-    ctx.arc(lamp.px, y, lamp.r + 14, 0, Math.PI * 2);
-    ctx.strokeStyle = p.glow;
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    if (index < 0 || index >= ledCount) continue;
 
-    drawCircle(lamp.px, y, lamp.r, lamp.color, "#ffffff", 2);
-    drawCircle(lamp.px, y, 5, "#ffffff", lamp.color, 1);
+    const ledX = getLedX(index);
+
+    let fill = p.dim;
+    let radius = 4.3;
+    let glowRadius = 7;
+    let alpha = 0.35;
+
+    if (offset === -1 || offset === 1) {
+      fill = p.mid;
+      radius = 4.8;
+      glowRadius = 8;
+      alpha = 0.55;
+    }
+
+    if (offset === 0) {
+      fill = p.main;
+      radius = 5.6;
+      glowRadius = 10;
+      alpha = 0.9;
+    }
+
+    if (blinkOn) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(ledX, y, glowRadius, 0, Math.PI * 2);
+      ctx.fillStyle = p.glow;
+      ctx.fill();
+      ctx.restore();
+
+      drawCircle(
+        ledX,
+        y,
+        radius,
+        fill,
+        "#f2f2f2",
+        1
+      );
+
+      // Liten lysende kjerne i midten
+      if (offset === 0) {
+        drawCircle(
+          ledX,
+          y,
+          1.9,
+          "#ffffff",
+          p.main,
+          1
+        );
+      }
+    }
   }
 }
 
 function animateLight() {
   if (!runningLight) return;
 
-  const limits = getLimits();
-  x += speed * direction;
+  activeLedIndex += direction;
 
-  if (x >= limits.right - trainGap) {
-    x = limits.right - trainGap;
+  const minIndex = 2;
+  const maxIndex = ledCount - 3;
+
+  if (activeLedIndex >= maxIndex) {
+    activeLedIndex = maxIndex;
     direction = -1;
   }
 
-  if (x <= limits.left + trainGap) {
-    x = limits.left + trainGap;
+  if (activeLedIndex <= minIndex) {
+    activeLedIndex = minIndex;
     direction = 1;
   }
 
-  blinkOn = !blinkOn;
+  blinkOn = true;
   drawLightBar();
 
-  animationFrame = setTimeout(animateLight, 60);
+  // Høyere sliderverdi = raskere LED-hopp
+  // 25 ≈ roligere, 100 ≈ veldig rask
+  const delay = Math.max(18, 155 - speed);
+
+  animationTimer = setTimeout(animateLight, delay);
 }
 
 function speak(text, onEnd = null) {
@@ -231,18 +332,22 @@ function stopVoice() {
 
 function applyStep() {
   const step = steps[currentStep];
+
   stepTitle.textContent = step.title;
   stepTitle.style.color = step.color;
+
   instructionText.textContent = step.instruction;
+
   statusText.textContent = step.status;
   statusText.style.color = step.color;
+
   progressText.textContent = `Steg ${currentStep + 1} av ${steps.length}`;
   remainingSeconds = step.duration;
 
-  const limits = getLimits();
-  x = limits.left + trainGap;
+  activeLedIndex = 3;
   direction = 1;
   blinkOn = true;
+
   timerText.textContent = `Klar. Lysvarighet i dette steget: ${step.duration} sekunder`;
   drawLightBar();
 }
@@ -253,6 +358,7 @@ function startSession() {
   runningSession = true;
   runningLight = false;
   currentStep = 0;
+
   stopVoice();
   clearTimers();
 
@@ -264,6 +370,7 @@ function startVoiceThenLight() {
   if (!runningSession) return;
 
   const step = steps[currentStep];
+
   runningLight = false;
   timerText.textContent = "Stemmen leser først. Lyset starter automatisk etterpå.";
 
@@ -278,6 +385,7 @@ function startLight() {
 
   runningLight = true;
   remainingSeconds = steps[currentStep].duration;
+
   timerText.textContent = `Lyset kjører. Neste steg om ${remainingSeconds} sekunder.`;
 
   animateLight();
@@ -301,6 +409,7 @@ function countdown() {
 function finishCurrentLightPeriod() {
   runningLight = false;
   clearTimers();
+
   blinkOn = true;
   drawLightBar();
 
@@ -316,15 +425,20 @@ function finishCurrentLightPeriod() {
 function finishSession() {
   runningSession = false;
   runningLight = false;
+
   clearTimers();
+
   blinkOn = true;
   drawLightBar();
 
   stepTitle.textContent = "Økten er ferdig";
   stepTitle.style.color = "#ffffff";
+
   instructionText.textContent = closingText;
+
   statusText.textContent = "Ferdig → lys stoppet automatisk";
   statusText.style.color = "#ffffff";
+
   progressText.textContent = `Steg ${steps.length} av ${steps.length} fullført`;
   timerText.textContent = "Automatisk økt fullført.";
 
@@ -335,23 +449,30 @@ function finishSession() {
 function stopSession() {
   runningSession = false;
   runningLight = false;
+
   stopVoice();
   clearTimers();
+
   currentStep = 0;
   applyStep();
+
   statusText.textContent = "Økten er stoppet og satt tilbake til start.";
 }
 
 function resetApp() {
   stopSession();
+
   beforeDiscomfort.value = 6;
   beforeSafety.value = 4;
   afterDiscomfort.value = 3;
   afterSafety.value = 6;
+
   speedSlider.value = 25;
   speechRateSlider.value = 0.8;
+
   updateValues();
   applyStep();
+
   statusText.textContent = "Nullstilt. Klar til ny automatisk økt.";
 }
 
@@ -360,9 +481,10 @@ function clearTimers() {
     clearTimeout(countdownTimer);
     countdownTimer = null;
   }
-  if (animationFrame) {
-    clearTimeout(animationFrame);
-    animationFrame = null;
+
+  if (animationTimer) {
+    clearTimeout(animationTimer);
+    animationTimer = null;
   }
 }
 
@@ -418,8 +540,10 @@ function updateValues() {
   beforeSafetyValue.textContent = beforeSafety.value;
   afterDiscomfortValue.textContent = afterDiscomfort.value;
   afterSafetyValue.textContent = afterSafety.value;
+
   speedValue.textContent = speedSlider.value;
   speechRateValue.textContent = speechRateSlider.value;
+
   speed = Number(speedSlider.value);
 }
 
@@ -449,6 +573,7 @@ document.getElementById("closeAnalysisBtn").addEventListener("click", () => anal
 window.addEventListener("resize", resizeCanvas);
 
 introContent.textContent = introductionText;
+
 resizeCanvas();
 updateValues();
 applyStep();
